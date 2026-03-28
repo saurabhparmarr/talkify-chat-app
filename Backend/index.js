@@ -18,6 +18,8 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 
 // ---------- CORS Setup ----------
+import cors from "cors";
+
 const allowedOrigins = [
   "http://localhost:5173", // dev
   "https://talkify-chat-app-rho.vercel.app" // production
@@ -25,7 +27,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback){
-    if(!origin) return callback(null, true); // mobile apps / curl
+    if(!origin) return callback(null, true); // mobile apps / curl requests
     if(allowedOrigins.indexOf(origin) === -1){
       const msg = 'CORS policy: This origin is not allowed.';
       return callback(new Error(msg), false);
