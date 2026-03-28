@@ -5,9 +5,16 @@ import express from "express";
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://talkify-chat-app-rho.vercel.app"
+];
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
@@ -15,19 +22,23 @@ export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
-
 const userSocketMap = {}; 
 
 io.on("connection", (socket) => {
-
   const userId = socket.handshake.query.userId;
-  if (userId) userSocketMap[userId] = socket.id;
+
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+  }
+
+  // send online users
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {
-   
-    delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    if (userId) {
+      delete userSocketMap[userId];
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    }
   });
 });
 

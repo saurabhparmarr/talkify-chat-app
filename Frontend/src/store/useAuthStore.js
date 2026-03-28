@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { io } from "socket.io-client";
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
  const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
