@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useAuthStore from "../store/useAuthStore";
 import useChatStore from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
 import MessageSkeleton from "./MessageSkeleton";
 import MessageInput from "./MessageInput";
 import { formatMessageTime } from "../lib/utils";
-import { useRef } from "react";
 
 const ChatContainer = () => {
   const {
@@ -16,46 +15,66 @@ const ChatContainer = () => {
     subscribeToMessages,
     unsubscribeFromMessages,
   } = useChatStore();
+
   const { authUser } = useAuthStore();
+
   const messageEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  // 🔹 Fetch + socket
   useEffect(() => {
     getMessages(selectedUser._id);
-
     subscribeToMessages();
+
     return () => unsubscribeFromMessages();
-  }, [
-    selectedUser._id,
-    getMessages,
-    subscribeToMessages,
-    unsubscribeFromMessages,
-  ]);
+  }, [selectedUser._id]);
+
+  // 🔹 Smart scroll (ONLY when user at bottom)
   useEffect(() => {
-    if (messageEndRef.current && messages) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+
+    if (!container) return;
+
+    const isAtBottom =
+      container.scrollHeight - container.scrollTop <=
+      container.clientHeight + 50;
+
+    if (isAtBottom) {
+      messageEndRef.current?.scrollIntoView();
     }
   }, [messages]);
 
-  if (isMessagesLoading)
+  // 🔹 Loading state
+  if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col oveflow-auto">
+      <div className="flex-1 flex flex-col h-full">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
       </div>
     );
+  }
+
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col h-full">
+
       <ChatHeader />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+      {/* 🔥 Messages Container */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
         {messages.map((message) => (
           <div
             key={message._id}
             className={`chat ${
-              message.senderId === authUser._id ? "chat-end" : "chat-start"
+              message.senderId === authUser._id
+                ? "chat-end"
+                : "chat-start"
             }`}
-            ref={messageEndRef}
           >
-            <div className=" chat-image avatar">
+            <div className="chat-image avatar">
               <div className="size-10 rounded-full border">
                 <img
                   src={
@@ -88,10 +107,14 @@ const ChatContainer = () => {
             </div>
           </div>
         ))}
+
+        {/* 🔥 Scroll target */}
+        <div ref={messageEndRef}></div>
       </div>
 
       <MessageInput />
     </div>
   );
 };
+
 export default ChatContainer;

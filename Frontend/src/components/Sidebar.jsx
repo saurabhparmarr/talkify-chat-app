@@ -16,15 +16,15 @@ const Sidebar = () => {
 
   if (isUsersLoading) return <SidebarSkeleton />;
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
-      <div className="border-b border-base-300 w-full p-5">
+<aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col sticky top-0">
+      <div className="border-b border-base-300 w-full p-5 shrink-0">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
         </div>
         
       </div>
 
-      <div className="overflow-y-auto w-full py-3">
+      <div className="flex-1 overflow-y-auto w-full py-3">
         {users.map((user) => (
           <button
             onClick={() => setSelectedUser(user)}
@@ -43,7 +43,7 @@ const Sidebar = () => {
               <img
                 src={
                   user.profilePic ||
-                  "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 }
                 alt={user.name}
                 className="size-12 object-cover rounded-full"

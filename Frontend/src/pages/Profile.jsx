@@ -34,8 +34,8 @@ const handleSubmit = async () => {
 
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Profile</h2>
+    <div className="p-6 max-w-md mx-auto bg-black rounded shadow">
+      <h2 className="text-3xl font-bold mb-6 text-center to-blue-600">Profile</h2>
 
       
       <div className="relative w-32 h-32 mx-auto mb-4">
@@ -43,7 +43,7 @@ const handleSubmit = async () => {
           src={
             imagePreview ||
             authUser?.profilePic ||
-            "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+            "https://cdn-icons-png.flaticon.com/512/149/149071.png"
           }
           alt="Profile"
           className="w-32 h-32 rounded-full object-cover"

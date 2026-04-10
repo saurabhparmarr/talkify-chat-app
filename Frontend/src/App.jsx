@@ -29,10 +29,10 @@ const App = () => {
     <BrowserRouter>
       <Toaster />
 
-      <div className="h-screen flex flex-col overflow-hidden">
+      <div className="h-screen flex flex-col">
         <Navbar />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1">
           <Routes>
             <Route
               path="/"

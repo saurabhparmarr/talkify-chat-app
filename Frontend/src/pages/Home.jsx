@@ -8,9 +8,18 @@ const Home = () => {
   const { selectedUser } = useChatStore();
 
   return (
-    <div className="h-full flex bg-base-200">
-      <Sidebar />
-      {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+    <div className="flex h-full bg-base-200">
+
+      {/* Sidebar */}
+      <div className={`${selectedUser ? "hidden" : "block"} md:block`}>
+        <Sidebar />
+      </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+      </div>
+
     </div>
   );
 };
