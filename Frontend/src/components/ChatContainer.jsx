@@ -20,8 +20,6 @@ const ChatContainer = () => {
 
   const messageEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
-
-  // 🔹 Fetch + socket
   useEffect(() => {
     getMessages(selectedUser._id);
     subscribeToMessages();
@@ -29,7 +27,7 @@ const ChatContainer = () => {
     return () => unsubscribeFromMessages();
   }, [selectedUser._id]);
 
-  // 🔹 Smart scroll (ONLY when user at bottom)
+
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -44,7 +42,7 @@ const ChatContainer = () => {
     }
   }, [messages]);
 
-  // 🔹 Loading state
+  
   if (isMessagesLoading) {
     return (
       <div className="flex-1 flex flex-col h-full">
@@ -60,7 +58,7 @@ const ChatContainer = () => {
 
       <ChatHeader />
 
-      {/* 🔥 Messages Container */}
+
       <div
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
@@ -108,7 +106,7 @@ const ChatContainer = () => {
           </div>
         ))}
 
-        {/* 🔥 Scroll target */}
+
         <div ref={messageEndRef}></div>
       </div>
 

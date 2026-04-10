@@ -10,10 +10,8 @@ const ChatHeader = () => {
     <div className="p-2.5 border-b border-base-300 shrink-0 sticky top-0 bg-base-100 z-10">
       <div className="flex items-center justify-between">
 
-        {/* LEFT SECTION */}
         <div className="flex items-center gap-3">
 
-          {/* 🔥 Mobile Back Button */}
           <button
             onClick={() => setSelectedUser(null)}
             className="md:hidden"
@@ -21,7 +19,6 @@ const ChatHeader = () => {
             <ArrowLeft />
           </button>
 
-          {/* Avatar */}
           <div className="avatar">
             <div className="size-10 rounded-full relative">
               <img
@@ -34,7 +31,6 @@ const ChatHeader = () => {
             </div>
           </div>
 
-          {/* Name + Status */}
           <div>
             <h3 className="font-medium">{selectedUser?.name}</h3>
             <p className="text-sm text-base-content/70">
