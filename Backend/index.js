@@ -17,7 +17,8 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://talkify-chat-app-rho.vercel.app"
+  "https://talkify-chat-app-rho.vercel.app",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : []),
 ];
 
 app.use(cors({

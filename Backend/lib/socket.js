@@ -8,7 +8,8 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://talkify-chat-app-rho.vercel.app"
+  "https://talkify-chat-app-rho.vercel.app",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : []),
 ];
 
 const io = new Server(server, {
@@ -19,8 +20,8 @@ const io = new Server(server, {
   },
 });
 
-export function getReceiverSocketId(userId) {
-  return userSocketMap[userId]?.[0];
+export function getReceiverSocketIds(userId) {
+  return userSocketMap[userId] || [];
 }
 
 const userSocketMap = {};

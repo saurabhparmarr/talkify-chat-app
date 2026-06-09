@@ -1,6 +1,6 @@
 import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
+import { getReceiverSocketIds, io } from "../lib/socket.js";
 import cloudinary from "../lib/cloudinary.js";
 
 export const getUsers = async (req, res) => {
@@ -66,15 +66,15 @@ export const sendMessage = async (req, res) => {
 
     await message.save();
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    const senderSocketId = getReceiverSocketId(senderId);
+    const receiverSocketIds = getReceiverSocketIds(receiverId);
+    const senderSocketIds = getReceiverSocketIds(senderId);
 
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("message", message);
+    if (receiverSocketIds.length) {
+      io.to(receiverSocketIds).emit("message", message);
     }
 
-    if (senderSocketId) {
-      io.to(senderSocketId).emit("message", message);
+    if (senderSocketIds.length) {
+      io.to(senderSocketIds).emit("message", message);
     }
 
     res.status(201).json(message);

@@ -89,6 +89,8 @@ import { SOCKET_URL } from "../lib/config";
    if (!authUser || get().socket?.connected) return;
 
     const socket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"],
+      withCredentials: true,
       query: {
         userId: authUser._id,
       },
