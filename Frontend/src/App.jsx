@@ -15,7 +15,7 @@ const App = () => {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   if (isCheckingAuth && !authUser) {
     return (
@@ -29,10 +29,10 @@ const App = () => {
     <BrowserRouter>
       <Toaster />
 
-      <div className="h-screen flex flex-col">
+      <div className="flex h-screen flex-col bg-[#090815]">
         <Navbar />
 
-        <div className="flex-1">
+        <div className="min-h-0 flex-1">
           <Routes>
             <Route
               path="/"

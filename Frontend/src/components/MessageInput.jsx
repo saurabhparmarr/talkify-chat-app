@@ -47,19 +47,19 @@ const MessageInput = () => {
     }
   };
   return (
-    <div className="p-4 w-full">
+    <div className="w-full border-t border-white/10 bg-[#111022]/95 p-3 backdrop-blur sm:p-4">
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+              className="h-20 w-20 rounded-xl border border-violet-300/20 object-cover"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center
+              justify-center rounded-full bg-violet-950 text-white"
               type="button"
             >
               <X className="size-3" />
@@ -72,7 +72,7 @@ const MessageInput = () => {
         <div className="flex-1 flex gap-2">
           <input
             type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
+            className="input input-bordered input-sm w-full rounded-xl border-white/10 bg-white/10 text-white placeholder:text-violet-200/50 focus:border-violet-400 sm:input-md"
             placeholder="Type a message..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -88,8 +88,8 @@ const MessageInput = () => {
 
           <button
             type="button"
-    className={`flex btn btn-circle
-  ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+    className={`btn btn-circle border-white/10 bg-white/10
+  ${imagePreview ? "text-emerald-300" : "text-violet-200"}`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -97,7 +97,7 @@ const MessageInput = () => {
         </div>
         <button
           type="submit"
-          className="btn btn-sm btn-circle"
+          className="btn btn-circle btn-sm border-0 bg-violet-600 text-white hover:bg-violet-500 sm:btn-md"
           disabled={!text.trim() && !imagePreview}
         >
           <Send size={22} />

@@ -25,7 +25,7 @@ const ChatContainer = () => {
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
-  }, [selectedUser._id]);
+  }, [getMessages, selectedUser._id, subscribeToMessages, unsubscribeFromMessages]);
 
 
   useEffect(() => {
@@ -54,14 +54,14 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex h-full min-w-0 flex-1 flex-col bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.15),transparent_34%),#111022]">
 
       <ChatHeader />
 
 
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
+        className="flex-1 overflow-y-auto space-y-4 p-3 sm:p-5"
       >
         {messages.map((message) => (
           <div
@@ -73,7 +73,7 @@ const ChatContainer = () => {
             }`}
           >
             <div className="chat-image avatar">
-              <div className="size-10 rounded-full border">
+              <div className="size-9 rounded-full border border-white/10 sm:size-10">
                 <img
                   src={
                     message.senderId === authUser._id
@@ -93,7 +93,13 @@ const ChatContainer = () => {
               </time>
             </div>
 
-            <div className="chat-bubble flex flex-col">
+            <div
+              className={`chat-bubble flex max-w-[78vw] flex-col rounded-2xl px-4 py-3 text-sm shadow-lg sm:max-w-md ${
+                message.senderId === authUser._id
+                  ? "bg-violet-600 text-white"
+                  : "bg-white/10 text-violet-50"
+              }`}
+            >
               {message.image && (
                 <img
                   src={message.image}

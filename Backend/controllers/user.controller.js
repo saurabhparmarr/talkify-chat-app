@@ -21,6 +21,7 @@ export const signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      lastSeen: new Date(),
     });
 
     generateToken(newUser._id, res);
@@ -30,6 +31,7 @@ export const signup = async (req, res) => {
       name: newUser.name,
       email: newUser.email,
       profilePic: newUser.profilePic,
+      lastSeen: newUser.lastSeen,
       message: "User created successfully",
       success: true,
     });
@@ -57,12 +59,15 @@ export const login = async (req, res) => {
     }
 
     generateToken(user._id, res);
+    user.lastSeen = new Date();
+    await user.save();
 
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       profilePic: user.profilePic,
+      lastSeen: user.lastSeen,
       message: "Login successful",
       success: true,
     });

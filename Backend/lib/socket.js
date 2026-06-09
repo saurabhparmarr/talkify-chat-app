@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import User from "../models/user.model.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -19,25 +20,49 @@ const io = new Server(server, {
 });
 
 export function getReceiverSocketId(userId) {
-  return userSocketMap[userId];
+  return userSocketMap[userId]?.[0];
 }
 
-const userSocketMap = {}; 
+const userSocketMap = {};
+
+const emitPresence = async () => {
+  const onlineUsers = Object.keys(userSocketMap).filter(
+    (userId) => userSocketMap[userId]?.length
+  );
+
+  const users = await User.find({}, "_id lastSeen")
+    .lean({ defaults: false });
+  const lastSeenByUser = users.reduce((acc, user) => {
+    if (user.lastSeen) {
+      acc[user._id.toString()] = user.lastSeen;
+    }
+    return acc;
+  }, {});
+
+  io.emit("getOnlineUsers", onlineUsers);
+  io.emit("presenceUpdated", { onlineUsers, lastSeenByUser });
+};
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
-    userSocketMap[userId] = socket.id;
+    userSocketMap[userId] = [...(userSocketMap[userId] || []), socket.id];
   }
 
-  // send online users
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  emitPresence();
 
   socket.on("disconnect", () => {
     if (userId) {
-      delete userSocketMap[userId];
-      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+      userSocketMap[userId] = (userSocketMap[userId] || []).filter(
+        (socketId) => socketId !== socket.id
+      );
+
+      if (!userSocketMap[userId].length) {
+        delete userSocketMap[userId];
+      }
+
+      emitPresence();
     }
   });
 });

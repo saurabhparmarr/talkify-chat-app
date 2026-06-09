@@ -2,7 +2,8 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { io } from "socket.io-client";
-const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
+import { SOCKET_URL } from "../lib/config";
+
  const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -10,6 +11,7 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
   isCheckingAuth: true,
   isUpdatingProfile: false,
   onlineUsers: [],
+  lastSeenByUser: {},
   socket: null,
   checkAuth: async () => {
     try {
@@ -84,9 +86,9 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
 
   connectSocket: () => {
     const { authUser } = get();
-   if (!authUser) return;
+   if (!authUser || get().socket?.connected) return;
 
-    const socket = io(BASE_URL, {
+    const socket = io(SOCKET_URL, {
       query: {
         userId: authUser._id,
       },
@@ -98,10 +100,15 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
+
+    socket.on("presenceUpdated", ({ onlineUsers, lastSeenByUser }) => {
+      set({ onlineUsers, lastSeenByUser: lastSeenByUser || {} });
+    });
   },
 
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
+    set({ socket: null, onlineUsers: [], lastSeenByUser: {} });
   },
 }));
 
