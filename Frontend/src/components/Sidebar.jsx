@@ -3,13 +3,12 @@ import useAuthStore from "../store/useAuthStore";
 import useChatStore  from "../store/useChatStore";
 import SidebarSkeleton from "./SidebarSkeleton";
 import { useEffect } from "react";
-import { formatLastSeen } from "../lib/utils";
 
 const Sidebar = () => {
   const { selectedUser, setSelectedUser, users, getUsers, isUsersLoading } =
     useChatStore();
 
-  const { onlineUsers, presenceMap } = useAuthStore();
+  const { onlineUsers } = useAuthStore();
 
   useEffect(() => {
     getUsers();
@@ -26,56 +25,46 @@ const Sidebar = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto w-full py-3">
-        {users.map((user) => {
-          const isOnline = onlineUsers.includes(user._id);
-          const presence = presenceMap[user._id];
-          const statusText = isOnline
-            ? "Online"
-            : presence?.lastSeen
-              ? `Last seen ${formatLastSeen(presence.lastSeen)}`
-              : user.lastSeen
-                ? `Last seen ${formatLastSeen(user.lastSeen)}`
-                : "Offline";
-
-          return (
-            <button
-              onClick={() => setSelectedUser(user)}
-              key={user._id}
-              className={`
-                w-full p-3 flex items-center gap-3
-                hover:bg-base-300 transition-colors
-                ${
-                  selectedUser?._id === user._id
-                    ? "bg-base-300 ring-1 ring-base-300"
-                    : ""
+        {users.map((user) => (
+          <button
+            onClick={() => setSelectedUser(user)}
+            key={user._id}
+            className={`
+              w-full p-3 flex items-center gap-3
+              hover:bg-base-300 transition-colors
+              ${
+                selectedUser?._id === user._id
+                  ? "bg-base-300 ring-1 ring-base-300"
+                  : ""
+              }
+            `}
+          >
+            <div className="relative mx-auto lg:mx-0">
+              <img
+                src={
+                  user.profilePic ||
+                  "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 }
-              `}
-            >
-              <div className="relative mx-auto lg:mx-0">
-                <img
-                  src={
-                    user.profilePic ||
-                    "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                  }
-                  alt={user.name}
-                  className="size-12 object-cover rounded-full"
+                alt={user.name}
+                className="size-12 object-cover rounded-full"
+              />
+
+              {onlineUsers.includes(user._id) && (
+                <span
+                  className="absolute bottom-0 right-0 size-3 bg-green-500 
+                  rounded-full ring-2 ring-zinc-900"
                 />
+              )}
+            </div>
 
-                {isOnline && (
-                  <span
-                    className="absolute bottom-0 right-0 size-3 bg-green-500 
-                    rounded-full ring-2 ring-zinc-900"
-                  />
-                )}
+            <div className="hidden lg:block text-left min-w-0">
+              <div className="font-medium truncate">{user.name}</div>
+              <div className="text-sm text-zinc-400">
+                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>
-
-              <div className="hidden lg:block text-left min-w-0">
-                <div className="font-medium truncate">{user.name}</div>
-                <div className="text-sm text-zinc-400">{statusText}</div>
-              </div>
-            </button>
-          );
-        })}
+            </div>
+          </button>
+        ))}
       </div>
     </aside>
   );

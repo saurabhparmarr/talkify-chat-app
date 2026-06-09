@@ -17,21 +17,17 @@ connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:5174",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-  "https://talkify-chat-app-rho.vercel.app",
-  process.env.FRONTEND_URL,
-  process.env.CLIENT_URL,
-].filter(Boolean);
+  "https://talkify-chat-app-rho.vercel.app"
+];
 
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-
-    const msg = "CORS policy: This origin is not allowed.";
-    return callback(new Error(msg), false);
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = 'CORS policy: This origin is not allowed.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
   },
   credentials: true,
 }));

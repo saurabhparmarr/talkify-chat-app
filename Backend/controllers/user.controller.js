@@ -23,14 +23,13 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = generateToken(newUser._id, res);
+    generateToken(newUser._id, res);
 
     res.status(201).json({
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
       profilePic: newUser.profilePic,
-      token,
       message: "User created successfully",
       success: true,
     });
@@ -57,14 +56,13 @@ export const login = async (req, res) => {
         .json({ message: "Invalid email or password", success: false });
     }
 
-    const token = generateToken(user._id, res);
+    generateToken(user._id, res);
 
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       profilePic: user.profilePic,
-      token,
       message: "Login successful",
       success: true,
     });
@@ -79,8 +77,7 @@ export const logout = (req, res) => {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
+      sameSite: "strict",
     });
 
     res.status(200).json({ message: "Logout successful", success: true });

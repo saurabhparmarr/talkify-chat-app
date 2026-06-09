@@ -63,7 +63,6 @@ export const sendMessage = async (req, res) => {
     });
 
     await message.save();
-    await User.findByIdAndUpdate(senderId, { lastSeen: new Date() });
 
     const receiverSocketId = getReceiverSocketId(receiverId);
     const senderSocketId = getReceiverSocketId(senderId);

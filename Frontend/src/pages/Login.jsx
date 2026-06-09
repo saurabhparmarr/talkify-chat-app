@@ -27,75 +27,64 @@ const Login = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 px-4 py-10">
-      <div className="w-full max-w-5xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl shadow-indigo-100/70">
-        <div className="grid md:grid-cols-2">
-          <div className="hidden bg-gradient-to-br from-indigo-600 to-sky-500 p-10 text-white md:flex md:flex-col md:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-100">Talkify</p>
-              <h2 className="mt-4 text-3xl font-semibold">Welcome back</h2>
-              <p className="mt-3 text-sm text-indigo-100/90">
-                Sign in to continue chatting with your friends in a smoother experience.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-sm backdrop-blur">
-              <p className="font-medium">Why users love Talkify</p>
-              <p className="mt-2 text-indigo-100/90">Fast messaging, clean design, and private conversations.</p>
-            </div>
-          </div>
+    <main className="flex items-center justify-center w-full px-4">
+      <form
+        className="flex w-full flex-col max-w-96"
+        onSubmit={handleSubmit}
+      >
+        <h2 className="text-4xl font-medium text-gray-900">Login</h2>
 
-          <form className="flex flex-col p-8 sm:p-10" onSubmit={handleSubmit}>
-            <div className="text-center md:text-left">
-              <h2 className="text-3xl font-semibold text-gray-900">Login</h2>
-              <p className="mt-2 text-sm text-gray-500">Login to your account.</p>
-            </div>
+        <p className="mt-4 text-base text-gray-500/90">
+          Login to your account.
+        </p>
 
-            <div className="mt-8 space-y-5">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Email</label>
-                <input
-                  placeholder="Please enter your email"
-                  className="mt-2 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-                  required
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
 
-              <div>
-                <label className="text-sm font-medium text-gray-700">Password</label>
-                <input
-                  placeholder="Please enter your password"
-                  className="mt-2 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-                  required
-                  type="password"
-                  name="password"
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="mt-8 w-full rounded-xl bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? "Loading..." : "Login"}
-            </button>
-
-            <p className="mt-6 text-center text-sm text-gray-500">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-medium text-indigo-600 hover:underline">
-                Sign up
-              </Link>
-            </p>
-          </form>
+    
+        <div className="mt-6">
+          <label className="font-medium">Email</label>
+          <input
+            placeholder="Please enter your email"
+            className="mt-2 rounded-md ring ring-gray-200 focus:ring-2 focus:ring-indigo-600 outline-none px-3 py-3 w-full"
+            required
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
         </div>
-      </div>
+
+       
+        <div className="mt-6">
+          <label className="font-medium">Password</label>
+          <input
+            placeholder="Please enter your password"
+            className="mt-2 rounded-md ring ring-gray-200 focus:ring-2 focus:ring-indigo-600 outline-none px-3 py-3 w-full"
+            required
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="mt-8 py-3 w-full cursor-pointer rounded-md bg-indigo-600 text-white transition hover:bg-indigo-700"
+          disabled={isLoggingIn}
+        >
+          {isLoggingIn ? "Loading..." : "login"}
+        </button>
+
+        <p className="text-center py-8">
+        Don't have an account?{" "}
+          <Link
+            to="/SignUp"
+            className="text-indigo-600 hover:underline"
+          >
+            SignUp
+          </Link>
+        </p>
+      </form>
     </main>
   );
 };

@@ -1,73 +1,49 @@
-import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import useAuthStore from "../store/useAuthStore";
-
+import  useAuthStore  from "../store/useAuthStore";
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div className="navbar border-b border-gray-200 bg-white/90 px-4 shadow-sm backdrop-blur">
+    <div className="navbar bg-base-100 shadow-sm">
       <div className="flex-1">
-        <Link to="/" className="text-xl font-semibold tracking-tight text-indigo-600">
+        <Link to="/" className="btn btn-ghost text-xl">
           Talkify
         </Link>
       </div>
-
       {authUser && (
-        <div className="flex-none" ref={menuRef}>
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white p-0 shadow-sm transition hover:shadow-md"
-          >
-            <img
-              alt="profile"
-              src={
-                authUser?.profilePic ||
-                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-              }
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          </button>
-
-          {isMenuOpen && (
-            <div className="absolute right-4 z-50 mt-2 w-48 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl">
-              <Link
-                to="/profile"
-                className="block rounded-xl px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-indigo-50 hover:text-indigo-600"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Profile
-              </Link>
-
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  logout();
-                }}
-                className="mt-1 block w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-gray-700 transition hover:bg-indigo-50 hover:text-indigo-600"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+  <div className="flex-none">
+    <div className="dropdown dropdown-end">
+      <div
+        tabIndex={0}
+        role="button"
+        className="btn btn-ghost btn-circle avatar"
+      >
+        <div className="w-10 rounded-full">
+          <img
+            alt="profile"
+            src={
+              authUser?.profilePic ||
+              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            }
+          />
         </div>
-      )}
+      </div>
+
+      <ul
+        tabIndex={-1}
+        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
+      >
+        <li>
+          <Link to="/profile">Profile</Link>
+        </li>
+
+        <li>
+          <p onClick={logout}>Logout</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+)}
     </div>
   );
 };
-
 export default Navbar;

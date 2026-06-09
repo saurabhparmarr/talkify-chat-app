@@ -3,9 +3,7 @@ import User from '../models/user.model.js';
 
  const isAuth = async (req, res, next) => {
     try{
-        const cookieToken = req.cookies?.token;
-        const authHeader = req.headers.authorization;
-        const token = cookieToken || (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
+        const token = req.cookies.token;
 
         if(!token){
             return res.status(401).json({ message: " authorization denied", success: false });
