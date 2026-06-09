@@ -33,14 +33,11 @@ const ChatContainer = () => {
 
     if (!container) return;
 
-    const isAtBottom =
-      container.scrollHeight - container.scrollTop <=
-      container.clientHeight + 50;
-
-    if (isAtBottom) {
-      messageEndRef.current?.scrollIntoView();
-    }
-  }, [messages]);
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, selectedUser._id]);
 
   
   if (isMessagesLoading) {
@@ -61,59 +58,61 @@ const ChatContainer = () => {
 
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto space-y-4 p-3 sm:p-5"
+        className="flex-1 overflow-y-auto p-3 sm:p-5"
       >
-        {messages.map((message) => (
-          <div
-            key={message._id}
-            className={`chat ${
-              message.senderId === authUser._id
-                ? "chat-end"
-                : "chat-start"
-            }`}
-          >
-            <div className="chat-image avatar">
-              <div className="size-9 rounded-full border border-white/10 sm:size-10">
-                <img
-                  src={
-                    message.senderId === authUser._id
-                      ? authUser.profilePic ||
-                        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                      : selectedUser.profilePic ||
-                        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                  }
-                  alt="profile pic"
-                />
-              </div>
-            </div>
-
-            <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
-                {formatMessageTime(message.createdAt)}
-              </time>
-            </div>
-
+        <div className="flex min-h-full flex-col justify-end gap-4">
+          {messages.map((message) => (
             <div
-              className={`chat-bubble flex max-w-[78vw] flex-col rounded-2xl px-4 py-3 text-sm shadow-lg sm:max-w-md ${
+              key={message._id}
+              className={`chat ${
                 message.senderId === authUser._id
-                  ? "bg-violet-600 text-white"
-                  : "bg-white/10 text-violet-50"
+                  ? "chat-end"
+                  : "chat-start"
               }`}
             >
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
-              )}
-              {message.text && <p>{message.text}</p>}
+              <div className="chat-image avatar">
+                <div className="size-9 rounded-full border border-white/10 sm:size-10">
+                  <img
+                    src={
+                      message.senderId === authUser._id
+                        ? authUser.profilePic ||
+                          "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                        : selectedUser.profilePic ||
+                          "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    }
+                    alt="profile pic"
+                  />
+                </div>
+              </div>
+
+              <div className="chat-header mb-1">
+                <time className="ml-1 text-xs opacity-50">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+              </div>
+
+              <div
+                className={`chat-bubble flex max-w-[78vw] flex-col rounded-2xl px-4 py-3 text-sm shadow-lg sm:max-w-md ${
+                  message.senderId === authUser._id
+                    ? "bg-violet-600 text-white"
+                    : "bg-white/10 text-violet-50"
+                }`}
+              >
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="Attachment"
+                    className="mb-2 rounded-md sm:max-w-[200px]"
+                  />
+                )}
+                {message.text && <p>{message.text}</p>}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
 
-        <div ref={messageEndRef}></div>
+          <div ref={messageEndRef}></div>
+        </div>
       </div>
 
       <MessageInput />
