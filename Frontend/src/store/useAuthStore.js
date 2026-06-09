@@ -2,8 +2,23 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { io } from "socket.io-client";
-const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
- const useAuthStore = create((set, get) => ({
+
+const setAuthToken = (token) => {
+  if (token) {
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete axiosInstance.defaults.headers.common["Authorization"];
+  }
+};
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:5000/api` : `${window.location.origin}/api`);
+const SOCKET_BASE_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  (import.meta.env.DEV ? "http://127.0.0.1:5000" : window.location.origin);
+
+const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
@@ -11,13 +26,18 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
   isUpdatingProfile: false,
   onlineUsers: [],
   socket: null,
+  presenceMap: {},
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/users/check");
+      const res = await axiosInstance.get("/users/check", { timeout: 6000 });
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
-      console.log("error in checkAuth", error);
+      const status = error?.response?.status;
+      if (status !== 401 && status !== 403) {
+        console.warn("checkAuth failed", error?.message || error);
+      }
+      set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
     }
@@ -27,13 +47,15 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/users/signup", data);
+      const { token, ...userData } = res.data;
 
-      set({ authUser: res.data });
+      set({ authUser: userData });
+      setAuthToken(token);
       toast.success(res.data.message);
       get().connectSocket();
     } catch (error) {
       console.log("error in signup", error);
-      toast.success(error.response.data.message);
+      toast.error(error.response?.data?.message || "Signup failed");
     } finally {
       set({ isSigningUp: false });
     }
@@ -42,13 +64,18 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/users/login", data);
+      const { token, ...userData } = res.data;
 
-      set({ authUser: res.data });
+      set({ authUser: userData });
+      setAuthToken(token);
       toast.success(res.data.message);
       get().connectSocket();
     } catch (error) {
       console.log("error in login", error);
-      toast.success(error.response.data.message);
+      const message = error.code === "ERR_NETWORK"
+        ? "Backend is not reachable. Make sure the server is running on port 5000."
+        : error.response?.data?.message || "Login failed";
+      toast.error(message);
     } finally {
       set({ isLoggingIn: false });
     }
@@ -59,11 +86,12 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
       const res = await axiosInstance.post("/users/logout");
 
       set({ authUser: null });
+      setAuthToken(null);
       toast.success(res.data.message);
       get().disconnectSocket();
     } catch (error) {
       console.log("error in logout", error);
-      toast.success(error.response.data.message);
+      toast.error(error.response?.data?.message || "Logout failed");
     }
   },
 
@@ -76,17 +104,17 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
       toast.success(res.data.message);
     } catch (error) {
       console.log("error in updateProfile", error);
-      toast.success(error.response.data.message);
+      toast.error(error.response?.data?.message || "Profile update failed");
     } finally {
       set({ isUpdatingProfile: false });
     }
   },
 
   connectSocket: () => {
-    const { authUser } = get();
-   if (!authUser) return;
+    const { authUser, socket: existingSocket } = get();
+    if (!authUser || existingSocket?.connected) return;
 
-    const socket = io(BASE_URL, {
+    const socket = io(SOCKET_BASE_URL, {
       query: {
         userId: authUser._id,
       },
@@ -98,10 +126,26 @@ const BASE_URL = "https://talkify-chat-app-ce2b.onrender.com";
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
+
+    socket.on("userStatusChanged", (presence) => {
+      set((state) => ({
+        presenceMap: {
+          ...state.presenceMap,
+          [presence.userId]: {
+            isOnline: presence.isOnline,
+            lastSeen: presence.lastSeen,
+          },
+        },
+      }));
+    });
   },
 
   disconnectSocket: () => {
-    if (get().socket?.connected) get().socket.disconnect();
+    const socket = get().socket;
+    if (socket?.connected) {
+      socket.disconnect();
+    }
+    set({ socket: null, onlineUsers: [], presenceMap: {} });
   },
 }));
 
