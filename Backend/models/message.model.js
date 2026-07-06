@@ -16,6 +16,7 @@ const messageSchema = new mongoose.Schema(
       index: true,
     },
 
+    
     text: {
       type: String,
       trim: true,
