@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
-import  useChatStore  from "../store/useChatStore";
+import { useEffect, useRef, useState } from "react";
+import useChatStore from "../store/useChatStore";
+import useAuthStore from "../store/useAuthStore";
 import toast from "react-hot-toast";
 import { Image, Send, X } from "lucide-react";
 
@@ -7,7 +8,9 @@ const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const typingTimeoutRef = useRef(null);
+  const { sendMessage, selectedUser } = useChatStore();
+  const TYPING_TIMEOUT_MS = 2800;
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -28,9 +31,57 @@ const MessageInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const emitTypingStatus = (isTyping) => {
+    const socket = useAuthStore.getState().socket;
+    const authUser = useAuthStore.getState().authUser;
+    if (!socket || !selectedUser?._id || !authUser?._id) return;
+
+    socket.emit(isTyping ? "typing" : "stopTyping", {
+      receiverId: selectedUser._id,
+      senderId: authUser._id,
+    });
+  };
+
+  const clearTypingIndicator = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    emitTypingStatus(false);
+  };
+
+  const handleTextChange = (e) => {
+    const value = e.target.value;
+    setText(value);
+
+    if (!selectedUser?._id) return;
+
+    if (value.trim()) {
+      emitTypingStatus(true);
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        emitTypingStatus(false);
+        typingTimeoutRef.current = null;
+      }, TYPING_TIMEOUT_MS);
+    } else {
+      clearTypingIndicator();
+    }
+  };
+
+  useEffect(() => {
+    return () => clearTypingIndicator();
+  }, []);
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
+
+    clearTypingIndicator();
 
     try {
       await sendMessage({
@@ -38,7 +89,6 @@ const MessageInput = () => {
         image: imagePreview,
       });
 
-     
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -75,7 +125,8 @@ const MessageInput = () => {
             className="input input-bordered input-sm w-full rounded-xl border-white/10 bg-white/10 text-white placeholder:text-violet-200/50 focus:border-violet-400 sm:input-md"
             placeholder="Type a message..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
+            onBlur={clearTypingIndicator}
           />
 
           <input

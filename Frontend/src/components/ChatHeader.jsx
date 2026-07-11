@@ -4,9 +4,10 @@ import { ArrowLeft } from "lucide-react";
 import { getPresenceText } from "../lib/utils";
 
 const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
+  const { selectedUser, setSelectedUser, typingUsers } = useChatStore();
   const { onlineUsers, lastSeenByUser } = useAuthStore();
   const isOnline = onlineUsers.includes(selectedUser?._id);
+  const isTyping = typingUsers.includes(selectedUser?._id);
 
   return (
     <div className="sticky top-0 z-10 shrink-0 border-b border-white/10 bg-[#111022]/95 px-4 py-3 backdrop-blur">
@@ -40,8 +41,8 @@ const ChatHeader = () => {
 
           <div className="min-w-0">
             <h3 className="truncate font-semibold text-white">{selectedUser?.name}</h3>
-            <p className={`text-sm ${isOnline ? "text-emerald-300" : "text-violet-200/70"}`}>
-              {getPresenceText(selectedUser, onlineUsers, lastSeenByUser)}
+            <p className={`text-sm ${isTyping ? "text-violet-300" : isOnline ? "text-emerald-300" : "text-violet-200/70"}`}>
+              {isTyping ? "Typing..." : getPresenceText(selectedUser, onlineUsers, lastSeenByUser)}
             </p>
           </div>
         </div>

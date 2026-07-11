@@ -26,6 +26,19 @@ export function getReceiverSocketIds(userId) {
 
 const userSocketMap = {};
 
+const emitTypingStatus = (receiverId, senderId, isTyping) => {
+  if (!receiverId || !senderId) return;
+
+  const receiverSocketIds = getReceiverSocketIds(receiverId);
+
+  if (receiverSocketIds.length) {
+    io.to(receiverSocketIds).emit(isTyping ? "typing" : "stopTyping", {
+      senderId,
+      receiverId,
+    });
+  }
+};
+
 const emitPresence = async () => {
   const onlineUsers = Object.keys(userSocketMap).filter(
     (userId) => userSocketMap[userId]?.length
@@ -52,6 +65,16 @@ io.on("connection", (socket) => {
   }
 
   emitPresence();
+
+  socket.on("typing", ({ receiverId }) => {
+    if (!receiverId || !userId) return;
+    emitTypingStatus(receiverId, userId, true);
+  });
+
+  socket.on("stopTyping", ({ receiverId }) => {
+    if (!receiverId || !userId) return;
+    emitTypingStatus(receiverId, userId, false);
+  });
 
   socket.on("disconnect", () => {
     if (userId) {

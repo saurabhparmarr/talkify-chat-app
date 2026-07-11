@@ -9,6 +9,7 @@ const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  typingUsers: [],
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -73,8 +74,7 @@ const useChatStore = create((set, get) => ({
 
       if (!isChatMessage) return;
 
-    
-      const exists = messages.some(m => m._id === message._id);
+      const exists = messages.some((m) => m._id === message._id);
 
       if (!exists) {
         set({ messages: [...messages, message] });
@@ -82,15 +82,56 @@ const useChatStore = create((set, get) => ({
     });
   },
 
+  subscribeToTyping: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+
+    socket.off("typing");
+    socket.off("stopTyping");
+
+    socket.on("typing", ({ senderId, receiverId }) => {
+      const { selectedUser, typingUsers } = get();
+      const authUser = useAuthStore.getState().authUser;
+
+      const isRelevantEvent =
+        authUser?._id === receiverId && selectedUser?._id === senderId;
+
+      if (!isRelevantEvent) return;
+
+      if (typingUsers.includes(senderId)) return;
+      set({ typingUsers: [...typingUsers, senderId] });
+    });
+
+    socket.on("stopTyping", ({ senderId, receiverId }) => {
+      const { selectedUser, typingUsers } = get();
+      const authUser = useAuthStore.getState().authUser;
+
+      const isRelevantEvent =
+        authUser?._id === receiverId && selectedUser?._id === senderId;
+
+      if (!isRelevantEvent) return;
+
+      set({ typingUsers: typingUsers.filter((id) => id !== senderId) });
+    });
+  },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket?.off("message");
   },
 
-  // 🔹 Select User
+  unsubscribeFromTyping: () => {
+    const socket = useAuthStore.getState().socket;
+    socket?.off("typing");
+    socket?.off("stopTyping");
+    set({ typingUsers: [] });
+  },
+
   setSelectedUser: (selectedUser) => {
-    set({ selectedUser });
+    set({ selectedUser, typingUsers: [] });
   },
 }));
 

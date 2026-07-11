@@ -14,12 +14,53 @@ import { SOCKET_URL } from "../lib/config";
   lastSeenByUser: {},
   socket: null,
   checkAuth: async () => {
+    set({ isCheckingAuth: true });
+
+    const attemptCheck = async () => {
+      return axiosInstance.get("/users/check", {
+        timeout: 30000,
+      });
+    };
+
     try {
-      const res = await axiosInstance.get("/users/check");
-      set({ authUser: res.data });
-      get().connectSocket();
+      const res = await attemptCheck();
+      if (res.data?._id) {
+        set({ authUser: res.data });
+        get().connectSocket();
+      } else {
+        set({ authUser: null });
+        get().disconnectSocket();
+      }
     } catch (error) {
-      console.log("error in checkAuth", error);
+      const status = error?.response?.status;
+      const isTimeout =
+        error?.code === "ECONNABORTED" ||
+        error?.message?.toLowerCase().includes("timeout");
+
+      if (status === 401 || status === 403) {
+        set({ authUser: null });
+        get().disconnectSocket();
+      } else if (isTimeout) {
+        console.warn("checkAuth timed out; retrying once...");
+        try {
+          const retryRes = await attemptCheck();
+          if (retryRes.data?._id) {
+            set({ authUser: retryRes.data });
+            get().connectSocket();
+          } else {
+            set({ authUser: null });
+            get().disconnectSocket();
+          }
+        } catch (retryError) {
+          const retryStatus = retryError?.response?.status;
+          if (retryStatus === 401 || retryStatus === 403) {
+            set({ authUser: null });
+            get().disconnectSocket();
+          }
+        }
+      } else {
+        console.warn("checkAuth failed", error?.message || error);
+      }
     } finally {
       set({ isCheckingAuth: false });
     }
