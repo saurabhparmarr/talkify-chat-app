@@ -127,26 +127,48 @@ import { SOCKET_URL } from "../lib/config";
 
   connectSocket: () => {
     const { authUser } = get();
-   if (!authUser || get().socket?.connected) return;
+    const userId = authUser?._id?.toString?.() || authUser?._id;
+
+    if (!userId) return;
+
+    const existingSocket = get().socket;
+    if (existingSocket?.connected) return;
+
+    if (existingSocket) {
+      existingSocket.removeAllListeners();
+      existingSocket.disconnect();
+    }
 
     const socket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
       query: {
-        userId: authUser._id,
+        userId,
       },
     });
 
-    socket.connect();
-    set({ socket: socket });
+    set({ socket });
+
+    socket.on("connect", () => {
+      socket.emit("presence:sync");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error", error?.message || error);
+    });
 
     socket.on("getOnlineUsers", (userIds) => {
-      set({ onlineUsers: userIds });
+      set({ onlineUsers: userIds || [] });
     });
 
     socket.on("presenceUpdated", ({ onlineUsers, lastSeenByUser }) => {
-      set({ onlineUsers, lastSeenByUser: lastSeenByUser || {} });
+      set({ onlineUsers: onlineUsers || [], lastSeenByUser: lastSeenByUser || {} });
     });
+
+    socket.connect();
   },
 
   disconnectSocket: () => {
