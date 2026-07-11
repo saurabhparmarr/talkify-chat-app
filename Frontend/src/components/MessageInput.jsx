@@ -9,7 +9,7 @@ const MessageInput = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const { sendMessage, selectedUser } = useChatStore();
+  const { sendMessage, selectedUser, isSendingMessage } = useChatStore();
   const TYPING_TIMEOUT_MS = 2800;
 
   const handleImageChange = (e) => {
@@ -79,6 +79,7 @@ const MessageInput = () => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
+    if (isSendingMessage) return;
     if (!text.trim() && !imagePreview) return;
 
     clearTypingIndicator();
@@ -149,9 +150,13 @@ const MessageInput = () => {
         <button
           type="submit"
           className="btn btn-circle btn-sm border-0 bg-violet-600 text-white hover:bg-violet-500 sm:btn-md"
-          disabled={!text.trim() && !imagePreview}
+          disabled={isSendingMessage || (!text.trim() && !imagePreview)}
         >
-          <Send size={22} />
+          {isSendingMessage ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : (
+            <Send size={22} />
+          )}
         </button>
       </form>
     </div>
