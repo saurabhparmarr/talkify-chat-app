@@ -80,7 +80,7 @@ const Login = () => {
         <p className="text-center py-8">
         Don't have an account?{" "}
           <Link
-            to="/SignUp"
+            to="/signup"
             className="text-indigo-600 hover:underline"
           >
             SignUp

@@ -17,7 +17,9 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
-  if (isCheckingAuth && !authUser) {
+  const isPublicRoute = ["/login", "/signup"].includes(window.location.pathname);
+
+  if (isCheckingAuth && !authUser && !isPublicRoute) {
     return (
       <div className="flex items-center justify-center h-screen bg-base-200">
         <Loader className="size-10 animate-spin" />

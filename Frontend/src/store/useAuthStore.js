@@ -19,13 +19,16 @@ import { SOCKET_URL } from "../lib/config";
     const attemptCheck = async () => {
       return axiosInstance.get("/users/check", {
         timeout: 30000,
+        validateStatus: (status) => status >= 200 && status < 500,
       });
     };
 
     try {
       const res = await attemptCheck();
-      if (res.data?._id) {
-        set({ authUser: res.data });
+      const user = res?.data;
+
+      if (user?._id) {
+        set({ authUser: user });
         get().connectSocket();
       } else {
         set({ authUser: null });
@@ -44,8 +47,9 @@ import { SOCKET_URL } from "../lib/config";
         console.warn("checkAuth timed out; retrying once...");
         try {
           const retryRes = await attemptCheck();
-          if (retryRes.data?._id) {
-            set({ authUser: retryRes.data });
+          const retryUser = retryRes?.data;
+          if (retryUser?._id) {
+            set({ authUser: retryUser });
             get().connectSocket();
           } else {
             set({ authUser: null });
@@ -59,7 +63,7 @@ import { SOCKET_URL } from "../lib/config";
           }
         }
       } else {
-        console.warn("checkAuth failed", error?.message || error);
+        console.warn("checkAuth could not be completed", error?.message || error);
       }
     } finally {
       set({ isCheckingAuth: false });
